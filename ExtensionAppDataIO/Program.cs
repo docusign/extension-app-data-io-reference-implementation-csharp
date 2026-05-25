@@ -13,16 +13,20 @@ builder.Services.AddOpenApi();
 
 // Bind AuthSettings from configuration
 builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthSettings"));
+builder.Services.Configure<DataIOSettings>(builder.Configuration.GetSection("DataIOSettings"));
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDataIOService, DataIOService>();
 
-// Configure JWT Bearer authentication (HS256, matching the TypeScript implementation)
-var jwtSecretKey = builder.Configuration["AuthSettings:JwtSecretKey"] ?? string.Empty;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddJwtBearer();
+
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IConfiguration>((options, configuration) =>
     {
+        var jwtSecretKey = configuration["AuthSettings:JwtSecretKey"] ?? string.Empty;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -50,3 +54,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program
+{
+}

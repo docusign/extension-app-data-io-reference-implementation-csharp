@@ -1,0 +1,35 @@
+[
+  {
+    "Id": "1",
+    "Deleted": false,
+    "AccountId": "2",
+    "PushCount": 15000,
+    "Type": "Customer_Direct",
+    "ShippingLatitude": 1.0052,
+    "lastUpdated": "2025-03-15T14:30:00Z",
+    "addy": "1",
+    "Name": "Master Record 0",
+    "addy2": {
+      "$class": "org.example.Address",
+      "street1": "123 Tech Valley Dr",
+      "street2": "Suite 2100",
+      "locality": "San Francisco",
+      "subdivision": "CA",
+      "countryOrRegion": "USA",
+      "postalCode": "94105"
+    },
+    "ChildMasterRecordIds": ["2"]
+  },
+  {
+    "Id": "2",
+    "Deleted": false,
+    "AccountId": "3",
+    "PushCount": 0,
+    "Type": "Prospect",
+    "ShippingLatitude": null,
+    "lastUpdated": "2025-03-16T09:45:00Z",
+    "addy": "2",
+    "Name": "Primary Record",
+    "ChildMasterRecordIds": []
+  }
+]

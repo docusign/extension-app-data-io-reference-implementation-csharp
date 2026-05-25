@@ -18,4 +18,10 @@
     <Folder Include="DataModels\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Data/MockDb/**/*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
