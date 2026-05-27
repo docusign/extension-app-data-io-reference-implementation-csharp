@@ -10,6 +10,8 @@ namespace ExtensionAppDataIO.Services
     public class AuthService : IAuthService
     {
         private readonly AuthSettings _settings;
+        private const int AccessTokenLifetimeSeconds = 3600;
+        private const int RefreshTokenLifetimeDays = 30;
 
         public AuthService(IOptions<AuthSettings> options)
         {
@@ -33,7 +35,7 @@ namespace ExtensionAppDataIO.Services
 
             var accessToken = new JwtSecurityToken(
                 claims: accessClaims,
-                expires: DateTime.UtcNow.AddSeconds(3600),
+                expires: DateTime.UtcNow.AddSeconds(AccessTokenLifetimeSeconds),
                 signingCredentials: creds);
 
             var refreshClaims = new[]
@@ -43,6 +45,7 @@ namespace ExtensionAppDataIO.Services
 
             var refreshToken = new JwtSecurityToken(
                 claims: refreshClaims,
+                expires: DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays),
                 signingCredentials: creds);
 
             var handler = new JwtSecurityTokenHandler();
@@ -51,7 +54,7 @@ namespace ExtensionAppDataIO.Services
             {
                 access_token = handler.WriteToken(accessToken),
                 token_type = "Bearer",
-                expires_in = 3600,
+                expires_in = AccessTokenLifetimeSeconds,
                 refresh_token = handler.WriteToken(refreshToken),
             };
         }
@@ -75,6 +78,8 @@ namespace ExtensionAppDataIO.Services
                 IssuerSigningKey = key,
                 ValidateIssuer = false,
                 ValidateAudience = false,
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
             };
 

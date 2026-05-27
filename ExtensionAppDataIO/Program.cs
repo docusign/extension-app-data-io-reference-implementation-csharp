@@ -7,7 +7,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -16,6 +17,7 @@ builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthS
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IModelManagerService, ModelManagerService>();
 builder.Services.AddScoped<IDataIOService, DataIOService>();
 
 // Configure JWT Bearer authentication (HS256, matching the TypeScript implementation)
