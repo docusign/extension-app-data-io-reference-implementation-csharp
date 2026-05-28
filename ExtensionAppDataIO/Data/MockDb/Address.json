@@ -1,0 +1,24 @@
+[
+  {
+    "Id": "1",
+    "Name": "HQ Building",
+    "street1": "123 Tech Valley Dr",
+    "street2": "Suite 2100",
+    "locality": "San Francisco",
+    "subdivision": "CA",
+    "countryOrRegion": "USA",
+    "postalCode": "94105",
+    "primaryContact": "1"
+  },
+  {
+    "Id": "2",
+    "Name": "Warehouse",
+    "street1": "456 Industrial Way",
+    "street2": "Bldg C",
+    "locality": "Oakland",
+    "subdivision": "CA",
+    "countryOrRegion": "USA",
+    "postalCode": "94607",
+    "primaryContact": "2"
+  }
+]
