@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ExtensionAppDataIO.Models
+namespace ExtensionAppDataIO.Models.Metamodel
 {
     // ── Decorator ────────────────────────────────────────────────────────────
 

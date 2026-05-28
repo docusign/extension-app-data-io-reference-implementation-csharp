@@ -1,4 +1,5 @@
 using ExtensionAppDataIO.Models;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Services
 {
@@ -7,7 +8,7 @@ namespace ExtensionAppDataIO.Services
         Task<CreateRecordResponse> CreateRecord(CreateRecordRequest request);
         Task<PatchRecordResponse> PatchRecord(PatchRecordRequest request);
         Task<SearchRecordsResponse> SearchRecords(SearchRecordsRequest request);
-        Task<GetTypeNamesResponse> GetTypeNames();
-        Task<GetTypeDefinitionsResponse> GetTypeDefinitions(GetTypeDefinitionsRequest request);
+        Task<Metamodel.GetTypeNamesResponse> GetTypeNames();
+        Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionsBody request);
     }
 }

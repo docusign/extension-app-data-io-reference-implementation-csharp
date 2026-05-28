@@ -2,23 +2,32 @@
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text.Json.Nodes;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Services
 {
     public class DataIOService : IDataIOService
     {
+        private readonly DataIODateTimeNormalizer _dateTimeNormalizer;
         private readonly DataIOFileStore _fileStore;
+        private readonly IModelManagerService _modelManagerService;
         private readonly DataIOQueryExecutor _queryExecutor;
         private readonly DataIOResultRehydrator _resultRehydrator;
 
-        public DataIOService(IWebHostEnvironment environment, IOptions<DataIOSettings> options)
+        public DataIOService(
+            IWebHostEnvironment environment,
+            IOptions<DataIOSettings> options,
+            DataIODateTimeNormalizer dateTimeNormalizer,
+            IModelManagerService modelManagerService)
         {
             var mockDbPath = options.Value.MockDbPath;
             var resolvedMockDbPath = Path.IsPathRooted(mockDbPath)
                 ? mockDbPath
                 : Path.Combine(environment.ContentRootPath, mockDbPath);
 
+            _dateTimeNormalizer = dateTimeNormalizer;
             _fileStore = new DataIOFileStore(resolvedMockDbPath);
+            _modelManagerService = modelManagerService;
 
             var pathResolver = new DataIOPathResolver(_fileStore);
             _queryExecutor = new DataIOQueryExecutor(pathResolver);
@@ -35,6 +44,7 @@ namespace ExtensionAppDataIO.Services
             var nextRecordId = _fileStore.ReadRecords(request.typeName).Count.ToString(CultureInfo.InvariantCulture);
             var record = (JsonObject)request.data.DeepClone();
             record["Id"] = nextRecordId;
+            _dateTimeNormalizer.NormalizeForWrite(record, request.typeName);
 
             _fileStore.AppendRecord(request.typeName, record);
 
@@ -44,14 +54,23 @@ namespace ExtensionAppDataIO.Services
             });
         }
 
-        public Task<GetTypeDefinitionsResponse> GetTypeDefinitions(GetTypeDefinitionsRequest request)
+        public Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionsBody request)
         {
-            return Task.FromResult(new GetTypeDefinitionsResponse());
+            if (request.TypeNames is null)
+            {
+                throw new ArgumentException("typeNames is required.");
+            }
+
+            var requestedTypeNames = request.TypeNames
+                .Select(typeName => typeName.TypeName)
+                .Where(typeName => !string.IsNullOrWhiteSpace(typeName));
+
+            return Task.FromResult(_modelManagerService.GetTypeDefinitions(requestedTypeNames));
         }
 
-        public Task<GetTypeNamesResponse> GetTypeNames()
+        public Task<Metamodel.GetTypeNamesResponse> GetTypeNames()
         {
-            return Task.FromResult(new GetTypeNamesResponse());
+            return Task.FromResult(_modelManagerService.GetTypeNames());
         }
 
         public Task<PatchRecordResponse> PatchRecord(PatchRecordRequest request)
@@ -61,7 +80,10 @@ namespace ExtensionAppDataIO.Services
                 throw new ArgumentException("typeName, recordId, and data are required.");
             }
 
-            var updated = _fileStore.PatchRecord(request.typeName, request.recordId, request.data);
+            var patchData = (JsonObject)request.data.DeepClone();
+            _dateTimeNormalizer.NormalizeForWrite(patchData, request.typeName);
+
+            var updated = _fileStore.PatchRecord(request.typeName, request.recordId, patchData);
             if (!updated)
             {
                 throw new KeyNotFoundException($"Record '{request.recordId}' was not found.");
@@ -93,6 +115,7 @@ namespace ExtensionAppDataIO.Services
             }
 
             var projectedRecord = _resultRehydrator.FilterAndRehydrate(request.query.attributesToSelect, records[resultIndex]);
+            _dateTimeNormalizer.NormalizeForRead(projectedRecord, request.query.from);
 
             return Task.FromResult(new SearchRecordsResponse
             {

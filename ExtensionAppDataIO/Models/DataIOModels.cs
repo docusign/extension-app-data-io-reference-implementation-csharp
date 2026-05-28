@@ -45,36 +45,6 @@ namespace ExtensionAppDataIO.Models
         public List<JsonObject> records { get; set; } = new();
     }
 
-    public class GetTypeNamesResponse
-    {
-        public List<TypeNameInfo> typeNames { get; set; } = new();
-    }
-
-    public class TypeNameInfo
-    {
-        public string typeName { get; set; } = string.Empty;
-        public string label { get; set; } = string.Empty;
-        public string? description { get; set; }
-    }
-
-    public class GetTypeDefinitionsRequest
-    {
-        public List<TypeNameInfo> typeNames { get; set; } = new();
-    }
-
-    public class GetTypeDefinitionsResponse
-    {
-        public List<JsonObject> declarations { get; set; } = new();
-        public List<GetTypeDefinitionsError> errors { get; set; } = new();
-    }
-
-    public class GetTypeDefinitionsError
-    {
-        public string typeName { get; set; } = string.Empty;
-        public string code { get; set; } = string.Empty;
-        public string message { get; set; } = string.Empty;
-    }
-
     public class QueryDefinition
     {
         public List<string> attributesToSelect { get; set; } = new();

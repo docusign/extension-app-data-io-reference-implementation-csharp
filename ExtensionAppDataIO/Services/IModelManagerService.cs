@@ -1,10 +1,10 @@
-using ExtensionAppDataIO.Models;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Services
 {
     public interface IModelManagerService
     {
-        GetTypeNamesResponse GetTypeNames();
-        GetTypeDefinitionsResponse GetTypeDefinitions(IEnumerable<string>? requestedTypeNames);
+        Metamodel.GetTypeNamesResponse GetTypeNames();
+        Metamodel.GetTypeDefinitionsResponse GetTypeDefinitions(IEnumerable<string>? requestedTypeNames);
     }
 }

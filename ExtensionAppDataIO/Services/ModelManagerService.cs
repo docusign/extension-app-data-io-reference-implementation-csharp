@@ -2,6 +2,7 @@ using ExtensionAppDataIO.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Services
 {
@@ -25,23 +26,23 @@ namespace ExtensionAppDataIO.Services
 
         // ── Public API ──────────────────────────────────────────────────────
 
-        public GetTypeNamesResponse GetTypeNames()
+        public Metamodel.GetTypeNamesResponse GetTypeNames()
         {
             var typeNames = GetConceptTypes()
                 .Where(IsReadable)
-                .Select(t => new TypeNameInfo
+                .Select(t => new Metamodel.TypeNameInfo
                 {
                     TypeName = t.Name,
                     Label = t.GetCustomAttribute<TermAttribute>()?.Label ?? t.Name,
                 })
                 .ToList();
 
-            return new GetTypeNamesResponse { TypeNames = typeNames };
+            return new Metamodel.GetTypeNamesResponse { TypeNames = typeNames };
         }
 
-        public GetTypeDefinitionsResponse GetTypeDefinitions(IEnumerable<string>? requestedTypeNames)
+        public Metamodel.GetTypeDefinitionsResponse GetTypeDefinitions(IEnumerable<string>? requestedTypeNames)
         {
-            var declarations = new List<MetamodelDeclaration>();
+            var declarations = new List<Metamodel.MetamodelDeclaration>();
 
             foreach (var enumType in GetEnumTypes())
             {
@@ -53,7 +54,7 @@ namespace ExtensionAppDataIO.Services
                 declarations.Add(BuildConceptDeclaration(conceptType));
             }
 
-            return new GetTypeDefinitionsResponse
+            return new Metamodel.GetTypeDefinitionsResponse
             {
                 Declarations = declarations,
             };
@@ -64,23 +65,23 @@ namespace ExtensionAppDataIO.Services
         private static bool IsReadable(Type t) =>
             t.GetCustomAttribute<CrudAttribute>()?.Permissions.Contains("Readable") == true;
 
-        private static MetamodelEnumDeclaration BuildEnumDeclaration(Type enumType)
+        private static Metamodel.MetamodelEnumDeclaration BuildEnumDeclaration(Type enumType)
         {
             var properties = Enum.GetNames(enumType)
-                .Select(name => new MetamodelEnumValueProperty
+                .Select(name => new Metamodel.MetamodelEnumValueProperty
                 {
                     Name = GetEnumMemberValue(enumType, name),
                 })
                 .ToList();
 
-            return new MetamodelEnumDeclaration
+            return new Metamodel.MetamodelEnumDeclaration
             {
                 Name = ToMetamodelTypeName(enumType),
                 Properties = properties,
             };
         }
 
-        private static MetamodelConceptDeclaration BuildConceptDeclaration(Type conceptType)
+        private static Metamodel.MetamodelConceptDeclaration BuildConceptDeclaration(Type conceptType)
         {
             var decorators = BuildClassDecorators(conceptType);
 
@@ -94,21 +95,21 @@ namespace ExtensionAppDataIO.Services
                 .Select(BuildProperty)
                 .ToList();
 
-            return new MetamodelConceptDeclaration
+            return new Metamodel.MetamodelConceptDeclaration
             {
                 Name = conceptType.Name,
                 IsAbstract = false,
                 Identified = identifierProp is not null
-                    ? new MetamodelIdentifiedBy { Name = GetCtoName(identifierProp) }
+                    ? new Metamodel.MetamodelIdentifiedBy { Name = GetCtoName(identifierProp) }
                     : null,
                 Decorators = decorators.Count > 0 ? decorators : null,
                 Properties = properties,
             };
         }
 
-        private static List<MetamodelDecorator> BuildClassDecorators(Type t)
+        private static List<Metamodel.MetamodelDecorator> BuildClassDecorators(Type t)
         {
-            var result = new List<MetamodelDecorator>();
+            var result = new List<Metamodel.MetamodelDecorator>();
             var term = t.GetCustomAttribute<TermAttribute>();
             var crud = t.GetCustomAttribute<CrudAttribute>();
             if (term is not null) result.Add(MakeDecorator("Term", term.Label));
@@ -116,20 +117,20 @@ namespace ExtensionAppDataIO.Services
             return result;
         }
 
-        private static MetamodelProperty BuildProperty(PropertyInfo prop)
+        private static Metamodel.MetamodelProperty BuildProperty(PropertyInfo prop)
         {
             var term = prop.GetCustomAttribute<TermAttribute>();
             var crud = prop.GetCustomAttribute<CrudAttribute>();
             var isRelationship = prop.GetCustomAttribute<RelationshipAttribute>() is not null;
 
-            var decorators = new List<MetamodelDecorator>();
+            var decorators = new List<Metamodel.MetamodelDecorator>();
             if (term is not null) decorators.Add(MakeDecorator("Term", term.Label));
             if (crud is not null) decorators.Add(MakeDecorator("Crud", crud.Permissions));
 
             var (baseType, isArray, isOptional) = UnwrapType(prop.PropertyType);
 
-            MetamodelProperty mp = isRelationship
-                ? new MetamodelRelationshipProperty { Type = new TypeIdentifier { Name = BuildTypeIdentifierName(baseType) } }
+            Metamodel.MetamodelProperty mp = isRelationship
+                ? new Metamodel.MetamodelRelationshipProperty { Type = new Metamodel.TypeIdentifier { Name = BuildTypeIdentifierName(baseType) } }
                 : MapToMetamodelProperty(baseType);
 
             mp.Name = GetCtoName(prop);
@@ -137,12 +138,12 @@ namespace ExtensionAppDataIO.Services
             mp.IsOptional = isOptional;
             mp.Decorators = decorators.Count > 0 ? decorators : null;
 
-            if (mp is MetamodelStringProperty stringProperty)
+            if (mp is Metamodel.MetamodelStringProperty stringProperty)
             {
                 var maxLength = prop.GetCustomAttribute<MaxLengthAttribute>()?.Length;
                 if (maxLength is not null)
                 {
-                    stringProperty.LengthValidator = new MetamodelStringLengthValidator
+                    stringProperty.LengthValidator = new Metamodel.MetamodelStringLengthValidator
                     {
                         MinLength = 0,
                         MaxLength = maxLength.Value,
@@ -153,18 +154,18 @@ namespace ExtensionAppDataIO.Services
             return mp;
         }
 
-        private static MetamodelProperty MapToMetamodelProperty(Type baseType)
+        private static Metamodel.MetamodelProperty MapToMetamodelProperty(Type baseType)
         {
-            if (baseType == typeof(string))   return new MetamodelStringProperty();
-            if (baseType == typeof(float) || baseType == typeof(double)) return new MetamodelDoubleProperty();
-            if (baseType == typeof(int))      return new MetamodelIntegerProperty();
-            if (baseType == typeof(bool))     return new MetamodelBooleanProperty();
-            if (baseType == typeof(DateTime)) return new MetamodelDateTimeProperty();
+            if (baseType == typeof(string))   return new Metamodel.MetamodelStringProperty();
+            if (baseType == typeof(float) || baseType == typeof(double)) return new Metamodel.MetamodelDoubleProperty();
+            if (baseType == typeof(int))      return new Metamodel.MetamodelIntegerProperty();
+            if (baseType == typeof(bool))     return new Metamodel.MetamodelBooleanProperty();
+            if (baseType == typeof(DateTime)) return new Metamodel.MetamodelDateTimeProperty();
 
             if (baseType.IsEnum || typeof(Concept).IsAssignableFrom(baseType))
-                return new MetamodelObjectProperty { Type = new TypeIdentifier { Name = BuildTypeIdentifierName(baseType) } };
+                return new Metamodel.MetamodelObjectProperty { Type = new Metamodel.TypeIdentifier { Name = BuildTypeIdentifierName(baseType) } };
 
-            return new MetamodelStringProperty(); // fallback
+            return new Metamodel.MetamodelStringProperty(); // fallback
         }
 
         // ── Helpers ─────────────────────────────────────────────────────────
@@ -215,11 +216,11 @@ namespace ExtensionAppDataIO.Services
             return type.Name;
         }
 
-        private static MetamodelDecorator MakeDecorator(string name, string value) =>
-            new MetamodelDecorator
+        private static Metamodel.MetamodelDecorator MakeDecorator(string name, string value) =>
+            new Metamodel.MetamodelDecorator
             {
                 Name = name,
-                Arguments = new List<DecoratorArgument> { new DecoratorString { Value = value } },
+                Arguments = new List<Metamodel.DecoratorArgument> { new Metamodel.DecoratorString { Value = value } },
             };
     }
 }

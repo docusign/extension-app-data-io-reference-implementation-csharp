@@ -19,6 +19,7 @@ builder.Services.Configure<DataIOSettings>(builder.Configuration.GetSection("Dat
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IModelManagerService, ModelManagerService>();
+builder.Services.AddSingleton<DataIODateTimeNormalizer>();
 builder.Services.AddScoped<IDataIOService, DataIOService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -2,6 +2,7 @@
 using ExtensionAppDataIO.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Controllers
 {
@@ -45,7 +46,7 @@ namespace ExtensionAppDataIO.Controllers
 
         [HttpPost("getTypeDefinitions")]
         [Authorize]
-        public async Task<IActionResult> GetTypeDefinitions([FromBody] GetTypeDefinitionsRequest request)
+        public async Task<IActionResult> GetTypeDefinitions([FromBody] Metamodel.GetTypeDefinitionsBody request)
         {
             return await Execute(() => _dataIOService.GetTypeDefinitions(request));
         }
