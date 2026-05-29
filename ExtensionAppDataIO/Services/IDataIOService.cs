@@ -9,6 +9,6 @@ namespace ExtensionAppDataIO.Services
         Task<PatchRecordResponse> PatchRecord(PatchRecordRequest request);
         Task<SearchRecordsResponse> SearchRecords(SearchRecordsRequest request);
         Task<Metamodel.GetTypeNamesResponse> GetTypeNames();
-        Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionsBody request);
+        Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionRequestBody request);
     }
 }

@@ -54,7 +54,7 @@ namespace ExtensionAppDataIO.Services
             });
         }
 
-        public Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionsBody request)
+        public Task<Metamodel.GetTypeDefinitionsResponse> GetTypeDefinitions(Metamodel.GetTypeDefinitionRequestBody request)
         {
             if (request.TypeNames is null)
             {
@@ -62,7 +62,6 @@ namespace ExtensionAppDataIO.Services
             }
 
             var requestedTypeNames = request.TypeNames
-                .Select(typeName => typeName.TypeName)
                 .Where(typeName => !string.IsNullOrWhiteSpace(typeName));
 
             return Task.FromResult(_modelManagerService.GetTypeDefinitions(requestedTypeNames));

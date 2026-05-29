@@ -46,7 +46,7 @@ namespace ExtensionAppDataIO.Controllers
 
         [HttpPost("getTypeDefinitions")]
         [Authorize]
-        public async Task<IActionResult> GetTypeDefinitions([FromBody] Metamodel.GetTypeDefinitionsBody request)
+        public async Task<IActionResult> GetTypeDefinitions([FromBody] Metamodel.GetTypeDefinitionRequestBody request)
         {
             return await Execute(() => _dataIOService.GetTypeDefinitions(request));
         }
