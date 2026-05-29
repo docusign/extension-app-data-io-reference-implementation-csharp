@@ -11,6 +11,13 @@ namespace ExtensionAppDataIO.Controllers
     [Route("api/oauth")]
     public class AuthController : Controller
     {
+        private enum OAuthGrantType
+        {
+            AuthorizationCode,
+            RefreshToken,
+            ClientCredentials
+        }
+
         private readonly IAuthService _authService;
         private readonly AuthSettings _settings;
 
@@ -18,6 +25,29 @@ namespace ExtensionAppDataIO.Controllers
         {
             _authService = authService;
             _settings = options.Value;
+        }
+
+        private static bool TryParseGrantType(string? grantType, out OAuthGrantType parsedGrantType)
+        {
+            parsedGrantType = default;
+
+            if (string.IsNullOrWhiteSpace(grantType))
+                return false;
+
+            switch (grantType.Trim().ToLowerInvariant())
+            {
+                case "authorization_code":
+                    parsedGrantType = OAuthGrantType.AuthorizationCode;
+                    return true;
+                case "refresh_token":
+                    parsedGrantType = OAuthGrantType.RefreshToken;
+                    return true;
+                case "client_credentials":
+                    parsedGrantType = OAuthGrantType.ClientCredentials;
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         // GET /api/oauth/authorize
@@ -49,21 +79,24 @@ namespace ExtensionAppDataIO.Controllers
             {
                 TokenResponse tokenResponse;
 
-                if (request.grant_type == "authorization_code")
+                if (!TryParseGrantType(request.grant_type, out var grantType))
+                    return BadRequest(new { error = "unsupported_grant_type" });
+
+                if (grantType == OAuthGrantType.AuthorizationCode)
                 {
                     if (string.IsNullOrEmpty(request.code))
                         return BadRequest(new { error = "invalid_request", error_description = "code is required" });
 
                     tokenResponse = _authService.GenerateTokenFromAuthCode(request.code);
                 }
-                else if (request.grant_type == "refresh_token")
+                else if (grantType == OAuthGrantType.RefreshToken)
                 {
                     if (string.IsNullOrEmpty(request.refresh_token))
                         return BadRequest(new { error = "invalid_request", error_description = "refresh_token is required" });
 
                     tokenResponse = _authService.GenerateTokenFromRefreshToken(request.refresh_token);
                 }
-                else if (request.grant_type == "client_credentials")
+                else
                 {
                     string? clientId = null;
                     string? clientSecret = null;
@@ -82,10 +115,6 @@ namespace ExtensionAppDataIO.Controllers
                         return Unauthorized(new { error = "invalid_client" });
 
                     tokenResponse = _authService.GenerateTokenFromClientCredentials(clientId, clientSecret);
-                }
-                else
-                {
-                    return BadRequest(new { error = "unsupported_grant_type" });
                 }
 
                 return Ok(tokenResponse);
