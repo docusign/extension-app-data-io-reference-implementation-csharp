@@ -27,18 +27,6 @@ manifests/
         clientCredentials.ReadOnlyManifest.json
         clientCredentials.ReadWriteManifest.json
 ```
-## Hosted Version (no setup required)
-You can use the hosted version of this reference implementation by directly uploading the appropriate manifest file located in the [manifests/hosted/](manifests/hosted) folder to the Docusign Developer Console. See [Upload your manifest and create the data IO app](#3-upload-your-manifest-and-create-the-data-io-app).
-
-**Note:** The provided manifests include `clientId` and `clientSecret` values used in the sample authentication connection. These do not authenticate to a real system, but the hosted reference implementation requires these exact values.
-
-## Choose your setup: local or cloud deployment
-If you want to run the app locally using .NET and ngrok, follow the [Local setup instructions](#local-setup-instructions) below.
-
-If you want to deploy the app to the cloud using Docker and Terraform, see [Deploying an extension app to the cloud with Terraform](terraform/README.md). This includes cloud-specific setup instructions for the following cloud providers:
-- [Amazon Web Services](https://aws.amazon.com/)
-- [Microsoft Azure](https://azure.microsoft.com/)
-- [Google Cloud Platform](https://cloud.google.com/)
 
 ## Local setup instructions
 
