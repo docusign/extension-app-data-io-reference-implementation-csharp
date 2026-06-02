@@ -43,11 +43,18 @@ git clone https://github.com/docusign/extension-app-data-io-reference-implementa
 - If you already have values for `JwtSecretKey`, `OAuthClientId`, `OAuthClientSecret`, and `AuthorizationCode`, you may skip this step.
 
 The easiest way to generate a secret value is to run the following command:
+
+#### PowerShell
 ```bash
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'));"
+[Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(64))
 ```
 
-You will need values for `JwtSecretKey`, `OAuthClientId`, `OAuthClientSecret`, and `AuthorizationCode`.
+#### OpenSSL (macOS/Linux)
+```bash
+openssl rand -hex 64
+```
+
+Each command generates a 128-character hexadecimal string (64 random bytes) that can be used as a secret value. Generate separate values for `JwtSecretKey`, `OAuthClientId`, `OAuthClientSecret`, and `AuthorizationCode`.
 
 ### 3. Configure appsettings for the cloned repository
 - If you're running this in a development environment, create a copy of `appsettings.Development.json` and save it as `appsettings.json`.
