@@ -28,7 +28,7 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Account ID")]
        [Crud("Readable")]
        [MaxLength(18)]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Account Name")]
        [Crud("Createable,Readable,Updateable")]
@@ -103,7 +103,7 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("MasterRecordId ID")]
        [Crud("Readable")]
        [MaxLength(18)]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Deleted")]
        [Crud("Readable")]
@@ -153,7 +153,7 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Address ID")]
        [Crud("Readable")]
        [MaxLength(18)]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Name")]
        [Crud("Createable,Readable,Updateable")]
@@ -213,12 +213,12 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Contact ID")]
        [Crud("Readable")]
        [JsonPropertyName("id")]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Full Name")]
        [Crud("Createable,Readable,Updateable")]
        [JsonPropertyName("fullName")]
-       public string FullName { get; set; }
+       public string FullName { get; set; } = string.Empty;
 
        [Term("Email")]
        [Crud("Createable,Readable,Updateable")]
@@ -247,12 +247,12 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Opportunity ID")]
        [Crud("Readable")]
        [JsonPropertyName("id")]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Opportunity Name")]
        [Crud("Createable,Readable,Updateable")]
        [JsonPropertyName("name")]
-       public string Name { get; set; }
+       public string Name { get; set; } = string.Empty;
 
        [Term("Amount")]
        [Crud("Createable,Readable,Updateable")]
@@ -280,7 +280,7 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Product Name")]
        [Crud("Createable,Readable,Updateable")]
        [JsonPropertyName("productName")]
-       public string ProductName { get; set; }
+       public string ProductName { get; set; } = string.Empty;
 
        [Term("Quantity")]
        [Crud("Createable,Readable,Updateable")]
@@ -314,12 +314,12 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Order ID")]
        [Crud("Readable")]
        [JsonPropertyName("id")]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Order Number")]
        [Crud("Createable,Readable,Updateable")]
        [JsonPropertyName("orderNumber")]
-       public string OrderNumber { get; set; }
+       public string OrderNumber { get; set; } = string.Empty;
 
        [Term("Total Amount")]
        [Crud("Createable,Readable,Updateable")]
@@ -353,12 +353,12 @@ namespace ExtensionAppDataIO.DataModels {
        [Term("Invoice ID")]
        [Crud("Readable")]
        [JsonPropertyName("id")]
-       public string Id { get; set; }
+       public string Id { get; set; } = string.Empty;
 
        [Term("Invoice Number")]
        [Crud("Createable,Readable,Updateable")]
        [JsonPropertyName("invoiceNumber")]
-       public string InvoiceNumber { get; set; }
+       public string InvoiceNumber { get; set; } = string.Empty;
 
        [Term("Amount")]
        [Crud("Createable,Readable,Updateable")]

@@ -2,6 +2,6 @@
 {
     public abstract class Record
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
     }
 }
