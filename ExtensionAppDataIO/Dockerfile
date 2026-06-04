@@ -1,30 +1,96 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
-
-# This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# Global arguments
+ARG SDK_IMAGE=mcr.microsoft.com/dotnet/sdk:10.0
+ARG RUNTIME_IMAGE=mcr.microsoft.com/dotnet/aspnet:10.0
+ARG APP_DIR=/app
+ARG SRC_DIR=/src
+ARG UID=1000
+ARG GID=1000
+ARG PORT=8080
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["ExtensionAppDataIO/ExtensionAppDataIO.csproj", "ExtensionAppDataIO/"]
-RUN dotnet restore "./ExtensionAppDataIO/ExtensionAppDataIO.csproj"
-COPY . .
-WORKDIR "/src/ExtensionAppDataIO"
-RUN dotnet build "./ExtensionAppDataIO.csproj" -c $BUILD_CONFIGURATION -o /app/build
+ARG PROJECT_NAME=ExtensionAppDataIO
+ARG PROJECT_FILE=ExtensionAppDataIO.csproj
+ARG PROJECT_CONTEXT_DIR=ExtensionAppDataIO
 
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ExtensionAppDataIO.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Base stage
+FROM ${RUNTIME_IMAGE} AS base
+ARG APP_DIR
+ARG UID
+ARG GID
+ARG PORT
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
+USER root
+RUN mkdir -p ${APP_DIR} && \
+	chown -R ${UID}:${GID} ${APP_DIR}
+
+USER ${UID}:${GID}
+WORKDIR ${APP_DIR}
+
+ENV PORT=${PORT}
+ENV ASPNETCORE_HTTP_PORTS=${PORT}
+EXPOSE ${PORT}
+
+# Dependencies stage
+FROM ${SDK_IMAGE} AS dependencies
+ARG SRC_DIR
+ARG UID
+ARG GID
+ARG PROJECT_NAME
+ARG PROJECT_FILE
+ARG PROJECT_CONTEXT_DIR
+
+USER root
+RUN mkdir -p ${SRC_DIR}/${PROJECT_NAME} /tmp/nuget && \
+	chown -R ${UID}:${GID} ${SRC_DIR} /tmp/nuget
+
+USER ${UID}:${GID}
+WORKDIR ${SRC_DIR}
+
+COPY --chown=${UID}:${GID} ${PROJECT_CONTEXT_DIR}/${PROJECT_FILE} ./${PROJECT_NAME}/
+
+RUN dotnet restore ./${PROJECT_NAME}/${PROJECT_FILE} --packages /tmp/nuget
+
+ENV NUGET_PACKAGES=/tmp/nuget
+
+# Development stage
+FROM dependencies AS development
+ARG SRC_DIR
+ARG UID
+ARG GID
+ARG PROJECT_NAME
+ARG PROJECT_FILE
+ARG PORT
+ARG PROJECT_CONTEXT_DIR
+
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:${PORT}
+
+COPY --chown=${UID}:${GID} ${PROJECT_CONTEXT_DIR}/ ${SRC_DIR}/${PROJECT_NAME}/
+WORKDIR ${SRC_DIR}/${PROJECT_NAME}
+
+CMD ["dotnet", "watch", "run", "--project", "ExtensionAppDataIO.csproj", "--no-launch-profile", "--urls", "http://+:8080"]
+
+# Build stage
+FROM dependencies AS build
+ARG SRC_DIR
+ARG UID
+ARG GID
+ARG PROJECT_NAME
+ARG PROJECT_FILE
+ARG BUILD_CONFIGURATION
+ARG PROJECT_CONTEXT_DIR
+
+COPY --chown=${UID}:${GID} ${PROJECT_CONTEXT_DIR}/ ${SRC_DIR}/${PROJECT_NAME}/
+WORKDIR ${SRC_DIR}/${PROJECT_NAME}
+
+RUN dotnet publish ./${PROJECT_FILE} -c ${BUILD_CONFIGURATION} -o ${SRC_DIR}/publish /p:UseAppHost=false --no-restore
+
+# Production stage
+FROM base AS production
+ARG UID
+ARG GID
+
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+COPY --chown=${UID}:${GID} --from=build /src/publish .
+
 ENTRYPOINT ["dotnet", "ExtensionAppDataIO.dll"]
