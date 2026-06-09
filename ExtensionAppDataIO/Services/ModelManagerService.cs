@@ -51,7 +51,7 @@ namespace ExtensionAppDataIO.Services
 
             foreach (var conceptType in GetConceptTypes())
             {
-                declarations.Add(BuildConceptDeclaration(conceptType));
+               declarations.Add(BuildConceptDeclaration(conceptType));
             }
 
             return new Metamodel.GetTypeDefinitionsResponse
@@ -121,13 +121,14 @@ namespace ExtensionAppDataIO.Services
         {
             var term = prop.GetCustomAttribute<TermAttribute>();
             var crud = prop.GetCustomAttribute<CrudAttribute>();
+            var isOptional = prop.GetCustomAttribute<OptionalAttribute>() is not null;
             var isRelationship = prop.GetCustomAttribute<RelationshipAttribute>() is not null;
 
             var decorators = new List<Metamodel.MetamodelDecorator>();
             if (term is not null) decorators.Add(MakeDecorator("Term", term.Label));
             if (crud is not null) decorators.Add(MakeDecorator("Crud", crud.Permissions));
 
-            var (baseType, isArray, isOptional) = UnwrapType(prop.PropertyType);
+            var (baseType, isArray) = UnwrapType(prop.PropertyType);
 
             Metamodel.MetamodelProperty mp = isRelationship
                 ? new Metamodel.MetamodelRelationshipProperty { Type = new Metamodel.TypeIdentifier { Name = BuildTypeIdentifierName(baseType) } }
@@ -170,13 +171,12 @@ namespace ExtensionAppDataIO.Services
 
         // ── Helpers ─────────────────────────────────────────────────────────
 
-        private static (Type baseType, bool isArray, bool isOptional) UnwrapType(Type type)
+        private static (Type baseType, bool isArray) UnwrapType(Type type)
         {
-            bool isOptional = false;
             bool isArray = false;
 
             var nullable = Nullable.GetUnderlyingType(type);
-            if (nullable is not null) { isOptional = true; type = nullable; }
+            if (nullable is not null) type = nullable;
 
             if (type.IsArray)
             {
@@ -186,10 +186,7 @@ namespace ExtensionAppDataIO.Services
                 if (innerNullable is not null) type = innerNullable;
             }
 
-            // Reference types are inherently nullable
-            if (!type.IsValueType) isOptional = true;
-
-            return (type, isArray, isOptional);
+            return (type, isArray);
         }
 
         private static string GetCtoName(PropertyInfo prop)

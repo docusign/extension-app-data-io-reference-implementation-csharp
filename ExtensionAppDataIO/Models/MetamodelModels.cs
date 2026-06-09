@@ -10,6 +10,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
 
     public class DecoratorString : DecoratorArgument
     {
+        [JsonPropertyName("value")]
         public string Value { get; set; } = string.Empty;
     }
 
@@ -18,9 +19,11 @@ namespace ExtensionAppDataIO.Models.Metamodel
         [JsonPropertyName("$class")]
         public string Class => "concerto.metamodel@1.0.0.Decorator";
 
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("arguments")]
         public List<DecoratorArgument>? Arguments { get; set; }
     }
 
@@ -31,6 +34,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
         [JsonPropertyName("$class")]
         public string Class => "concerto.metamodel@1.0.0.TypeIdentifier";
 
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -44,6 +48,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
         [JsonPropertyName("$class")]
         public string Class => "concerto.metamodel@1.0.0.IdentifiedBy";
 
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
     }
 
@@ -59,11 +64,17 @@ namespace ExtensionAppDataIO.Models.Metamodel
     [JsonDerivedType(typeof(MetamodelRelationshipProperty), "concerto.metamodel@1.0.0.RelationshipProperty")]
     public abstract class MetamodelProperty
     {
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
+        
+        [JsonPropertyName("isArray")]
         public bool IsArray { get; set; }
+
+        [JsonPropertyName("isOptional")]
         public bool IsOptional { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("decorators")]
         public List<MetamodelDecorator>? Decorators { get; set; }
     }
 
@@ -71,6 +82,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
     public class MetamodelStringProperty : MetamodelProperty
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("lengthValidator")]
         public MetamodelStringLengthValidator? LengthValidator { get; set; }
     }
 
@@ -79,7 +91,10 @@ namespace ExtensionAppDataIO.Models.Metamodel
         [JsonPropertyName("$class")]
         public string Class => "concerto.metamodel@1.0.0.StringLengthValidator";
 
+        [JsonPropertyName("minLength")]
         public int MinLength { get; set; }
+
+        [JsonPropertyName("maxLength")]
         public int MaxLength { get; set; }
     }
 
@@ -91,11 +106,13 @@ namespace ExtensionAppDataIO.Models.Metamodel
     // Object / relationship properties carry a type reference
     public class MetamodelObjectProperty : MetamodelProperty
     {
+        [JsonPropertyName("type")]
         public TypeIdentifier Type { get; set; } = new();
     }
 
     public class MetamodelRelationshipProperty : MetamodelProperty
     {
+        [JsonPropertyName("type")]
         public TypeIdentifier Type { get; set; } = new();
     }
 
@@ -105,6 +122,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
         [JsonPropertyName("$class")]
         public string Class => "concerto.metamodel@1.0.0.EnumProperty";
 
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
     }
 
@@ -115,24 +133,30 @@ namespace ExtensionAppDataIO.Models.Metamodel
     [JsonDerivedType(typeof(MetamodelEnumDeclaration),    "concerto.metamodel@1.0.0.EnumDeclaration")]
     public abstract class MetamodelDeclaration
     {
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("decorators")]
         public List<MetamodelDecorator>? Decorators { get; set; }
     }
 
     public class MetamodelConceptDeclaration : MetamodelDeclaration
     {
+        [JsonPropertyName("isAbstract")]
         public bool IsAbstract { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("identified")]
         public MetamodelIdentifiedBy? Identified { get; set; }
 
+        [JsonPropertyName("properties")]
         public List<MetamodelProperty> Properties { get; set; } = new();
     }
 
     public class MetamodelEnumDeclaration : MetamodelDeclaration
     {
+        [JsonPropertyName("properties")]
         public List<MetamodelEnumValueProperty> Properties { get; set; } = new();
     }
 
@@ -140,15 +164,20 @@ namespace ExtensionAppDataIO.Models.Metamodel
 
     public class TypeNameInfo
     {
+        [JsonPropertyName("typeName")]
         public string TypeName { get; set; } = string.Empty;
+
+        [JsonPropertyName("label")]
         public string Label    { get; set; } = string.Empty;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("description")]
         public string? Description { get; set; }
     }
 
     public class GetTypeNamesResponse
     {
+        [JsonPropertyName("typeNames")]
         public List<TypeNameInfo> TypeNames { get; set; } = new();
     }
 
@@ -164,6 +193,7 @@ namespace ExtensionAppDataIO.Models.Metamodel
 
     public class GetTypeDefinitionsResponse
     {
+        [JsonPropertyName("declarations")]
         public List<MetamodelDeclaration> Declarations { get; set; } = new();
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
