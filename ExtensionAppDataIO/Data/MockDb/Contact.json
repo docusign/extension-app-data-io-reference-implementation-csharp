@@ -1,0 +1,17 @@
+[
+    {
+      "Id": "1",
+      "fullName": "Sarah Johnson",
+      "email": "s.johnson@techcorp.com",
+      "phone": "+1-415-555-0193",
+      "currentOpportunity": "1"
+    },
+    {
+      "Id": "2",
+      "fullName": "Michael Chen",
+      "email": "m.chen@techcorp.com",
+      "phone": "+1-510-555-0176",
+      "currentOpportunity": "2"
+    }
+  ]
+  

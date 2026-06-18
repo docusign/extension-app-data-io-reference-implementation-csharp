@@ -1,45 +1,84 @@
-﻿using ExtensionAppDataIO.Services;
+﻿using ExtensionAppDataIO.Models;
+using ExtensionAppDataIO.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Controllers
 {
+    [Route("api/dataio")]
     public class DataIOController : Controller
     {
-        private IDataIOService _dataIOService;
+        private readonly IDataIOService _dataIOService;
 
         public DataIOController(IDataIOService dataIOService)
         {
             _dataIOService = dataIOService;
         }
 
-        public async Task<IActionResult> CreateRecord()
+        [HttpPost("createRecord")]
+        [Authorize]
+        public async Task<IActionResult> CreateRecord([FromBody] CreateRecordRequest request)
         {
-            await _dataIOService.CreateRecord();
-            return View();
+            return await Execute(() => _dataIOService.CreateRecord(request));
         }
 
-        public async Task<IActionResult> PatchRecord()
+        [HttpPost("patchRecord")]
+        [Authorize]
+        public async Task<IActionResult> PatchRecord([FromBody] PatchRecordRequest request)
         {
-            await _dataIOService.PatchRecord();
-            return View();
+            return await Execute(() => _dataIOService.PatchRecord(request));
         }
 
-        public async Task<IActionResult> SearchRecords()
+        [HttpPost("searchRecords")]
+        [Authorize]
+        public async Task<IActionResult> SearchRecords([FromBody] SearchRecordsRequest request)
         {
-            await _dataIOService.SearchRecords();
-            return View();
+            return await Execute(() => _dataIOService.SearchRecords(request));
         }
 
+        [HttpPost("getTypeNames")]
+        [Authorize]
         public async Task<IActionResult> GetTypeNames()
         {
-            await _dataIOService.GetTypeNames();
-            return View();
+            var result = await _dataIOService.GetTypeNames();
+            var json = JsonSerializer.Serialize(result);
+            return Ok(json);
         }
 
-        public async Task<IActionResult> GetTypeDefinitions()
+        [HttpPost("getTypeDefinitions")]
+        [Authorize]
+        public async Task<IActionResult> GetTypeDefinitions([FromBody] Metamodel.GetTypeDefinitionRequestBody request)
         {
-            await _dataIOService.GetTypeDefinitions();
-            return View();
+            var result = await _dataIOService.GetTypeDefinitions(request);
+            var json = JsonSerializer.Serialize(result);
+            return Ok(json);
+        }
+
+        private async Task<IActionResult> Execute<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return Ok(await action());
+            }
+            catch (ArgumentException exception)
+            {
+                return BadRequest(CreateErrorResponse("BAD_REQUEST", exception.Message));
+            }
+            catch (KeyNotFoundException exception)
+            {
+                return NotFound(CreateErrorResponse("NOT_FOUND", exception.Message));
+            }
+            catch
+            {
+                return StatusCode(500, CreateErrorResponse("INTERNAL_ERROR", "An internal error occurred."));
+            }
+        }
+
+        private static object CreateErrorResponse(string code, string message)
+        {
+            return new { code, message };
         }
     }
 }

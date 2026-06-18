@@ -1,0 +1,18 @@
+@model ExtensionAppDataIO.Models.AuthorizeViewModel
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirect Page</title>
+    <script src="/js/redirect.js"></script>
+</head>
+<body>
+    <h1>Welcome to the Redirect Page</h1>
+
+    <button id="consentButton"
+            data-redirect-uri="@Model.RedirectUri"
+            data-code="@Model.Code"
+            data-state="@Model.State">
+        Click me to consent
+    </button>
+</body>
+</html>
