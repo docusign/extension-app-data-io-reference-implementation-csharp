@@ -1,0 +1,47 @@
+name: extension-app-data-io-csharp
+
+services:
+  dataio-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: ExtensionAppDataIO/Dockerfile
+      target: development
+      args:
+        PORT: 8080
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_HTTP_PORTS: "8080"
+      AuthSettings__JwtSecretKey: ${AUTH_JWT_SECRET_KEY:-b48f0046467d1d2ef8f6c2a0a4007e596199b43fd491f1a2f223c58686df3b1a6c0e295dadc80811cf633981d1cbf36560e0ee91f87de36e27acd98306ebeff7}
+      AuthSettings__OAuthClientId: ${AUTH_OAUTH_CLIENT_ID:-31d040b29254174fb3afe9720c0dcfca43662f7d35eb9b17f0eb20456701515c789d33ee78acd3cfdf75d0a9cd3cdf7dd0866b8ef022f98caf6b7a2929fd25e9}
+      AuthSettings__OAuthClientSecret: ${AUTH_OAUTH_CLIENT_SECRET:-46c907643b229e602e5e2121adb3f0fdfb4b1ba0502b8da7ff41faf14477253e4049c33e99e8b4c7a23b3fbcf67b4c8d74244e5e1f88a43c324cd8dae960e991}
+      AuthSettings__AuthorizationCode: ${AUTH_AUTHORIZATION_CODE:-4cf62718907d84bc5874d4d128403072a3acfaf87df935bc65459684306a2b0fab52b7de5850b176522ad2e330d7ff21f3bd47b60cf13d046d36813570abc834}
+    ports:
+      - "5245:8080"
+    volumes:
+      - ./ExtensionAppDataIO:/src/ExtensionAppDataIO
+      - nuget_cache:/tmp/nuget
+
+  dataio-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: ExtensionAppDataIO/Dockerfile
+      target: production
+      args:
+        PORT: 8080
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_HTTP_PORTS: "8080"
+      AuthSettings__JwtSecretKey: ${AUTH_JWT_SECRET_KEY:-b48f0046467d1d2ef8f6c2a0a4007e596199b43fd491f1a2f223c58686df3b1a6c0e295dadc80811cf633981d1cbf36560e0ee91f87de36e27acd98306ebeff7}
+      AuthSettings__OAuthClientId: ${AUTH_OAUTH_CLIENT_ID:-31d040b29254174fb3afe9720c0dcfca43662f7d35eb9b17f0eb20456701515c789d33ee78acd3cfdf75d0a9cd3cdf7dd0866b8ef022f98caf6b7a2929fd25e9}
+      AuthSettings__OAuthClientSecret: ${AUTH_OAUTH_CLIENT_SECRET:-46c907643b229e602e5e2121adb3f0fdfb4b1ba0502b8da7ff41faf14477253e4049c33e99e8b4c7a23b3fbcf67b4c8d74244e5e1f88a43c324cd8dae960e991}
+      AuthSettings__AuthorizationCode: ${AUTH_AUTHORIZATION_CODE:-4cf62718907d84bc5874d4d128403072a3acfaf87df935bc65459684306a2b0fab52b7de5850b176522ad2e330d7ff21f3bd47b60cf13d046d36813570abc834}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  nuget_cache:
