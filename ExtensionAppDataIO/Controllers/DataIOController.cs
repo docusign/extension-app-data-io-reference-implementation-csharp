@@ -2,6 +2,7 @@
 using ExtensionAppDataIO.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using Metamodel = ExtensionAppDataIO.Models.Metamodel;
 
 namespace ExtensionAppDataIO.Controllers
@@ -41,14 +42,18 @@ namespace ExtensionAppDataIO.Controllers
         [Authorize]
         public async Task<IActionResult> GetTypeNames()
         {
-            return await Execute(() => _dataIOService.GetTypeNames());
+            var result = await _dataIOService.GetTypeNames();
+            var json = JsonSerializer.Serialize(result);
+            return Ok(json);
         }
 
         [HttpPost("getTypeDefinitions")]
         [Authorize]
         public async Task<IActionResult> GetTypeDefinitions([FromBody] Metamodel.GetTypeDefinitionRequestBody request)
         {
-            return await Execute(() => _dataIOService.GetTypeDefinitions(request));
+            var result = await _dataIOService.GetTypeDefinitions(request);
+            var json = JsonSerializer.Serialize(result);
+            return Ok(json);
         }
 
         private async Task<IActionResult> Execute<T>(Func<Task<T>> action)
